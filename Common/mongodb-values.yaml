@@ -1,0 +1,29 @@
+global:
+  storageClass: local-path
+
+architecture: replicaset
+replicaCount: 1
+replicaSetName: rs0
+useStatefulSet: true
+
+auth:
+  enabled: true
+  existingSecret: mongo
+
+arbiter:
+  enabled: false
+
+metrics:
+  enabled: true
+  resources:
+    requests:
+      memory: 100Mi
+    limits:
+      memory: 200Mi
+
+persistence:
+  size: 1Gi
+
+resourcesPreset: small
+
+
