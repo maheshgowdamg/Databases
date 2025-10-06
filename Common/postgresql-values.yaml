@@ -12,12 +12,9 @@ metrics:
 
 primary:
   extendedConfiguration: |
-    # Connection settings
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
-
-    # Logging to stdout (for Promtail to pick up)
     log_destination = 'stderr'
     logging_collector = off
     log_connections = off
@@ -29,18 +26,21 @@ primary:
     size: 2Gi
     storageClass: local-path
 
-  resourcesPreset: medium
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
 
 readReplicas:
   replicaCount: 1
 
   extendedConfiguration: |
-    # Connection settings
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
-
-    # Logging to stdout (for Promtail to pick up)
     log_destination = 'stderr'
     logging_collector = off
     log_connections = off
@@ -52,9 +52,16 @@ readReplicas:
     size: 2Gi
     storageClass: local-path
 
-  resourcesPreset: medium
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 400m
+      memory: 1Gi
 
 replication:
   enabled: true
   numSynchronousReplicas: 1
   synchronousCommit: "on"
+
