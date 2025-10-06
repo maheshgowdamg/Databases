@@ -10,12 +10,12 @@ metrics:
   enabled: true
   pgStatStatements: true
 
-# --- Shared log volume ---
-extraVolumes:
-  - name: log-volume
-    emptyDir: {}
-
 primary:
+  # --- Shared volume for logs ---
+  extraVolumes:
+    - name: log-volume
+      emptyDir: {}
+
   extendedConfiguration: |
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
@@ -51,10 +51,12 @@ primary:
       cpu: 500m
       memory: 1Gi
 
+  # --- Mount shared log volume ---
   extraVolumeMounts:
     - name: log-volume
       mountPath: /bitnami/postgresql/logs
 
+  # --- Cleanup sidecar ---
   sidecars:
     - name: log-cleaner
       image: "busybox:latest"
@@ -73,6 +75,11 @@ primary:
 
 readReplicas:
   replicaCount: 1
+
+  # --- Shared volume for logs ---
+  extraVolumes:
+    - name: log-volume
+      emptyDir: {}
 
   extendedConfiguration: |
     max_connections = 3001
@@ -109,10 +116,12 @@ readReplicas:
       cpu: 400m
       memory: 1Gi
 
+  # --- Mount shared log volume ---
   extraVolumeMounts:
     - name: log-volume
       mountPath: /bitnami/postgresql/logs
 
+  # --- Cleanup sidecar ---
   sidecars:
     - name: log-cleaner
       image: "busybox:latest"
@@ -133,4 +142,3 @@ replication:
   enabled: true
   numSynchronousReplicas: 1
   synchronousCommit: "on"
-
