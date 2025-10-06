@@ -1,5 +1,5 @@
 global:
-  storageClass: local-path
+ 
 
 architecture: replicaset
 replicaCount: 1
