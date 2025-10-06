@@ -9,49 +9,56 @@ global:
 metrics:
   enabled: true
   pgStatStatements: true
-  
 
 primary:
-  
   extendedConfiguration: |
+    # Connection settings
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+
+    # Logging to stdout (for Promtail to pick up)
     log_destination = 'stderr'
-    logging_collector = on
-    log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql.log'
+    logging_collector = off
     log_connections = off
     log_disconnections = off
     log_min_duration_statement = 1000
     log_statement = 'all'
+
   persistence:
     size: 2Gi
+
   resourcesPreset: medium
 
+  # Sidecar removed (stdout logs used by Promtail)
+  sidecars: []
+
 readReplicas:
-  replicaCount: 2
- 
+  replicaCount: 1
+
   extendedConfiguration: |
+    # Connection settings
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+
+    # Logging to stdout (for Promtail to pick up)
     log_destination = 'stderr'
-    logging_collector = on
-    log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql.log'
+    logging_collector = off
     log_connections = off
     log_disconnections = off
     log_min_duration_statement = 1000
     log_statement = 'all'
+
   persistence:
     size: 2Gi
+
   resourcesPreset: medium
+
+  # Sidecar removed (stdout logs used by Promtail)
+  sidecars: []
 
 replication:
   enabled: true
   numSynchronousReplicas: 1
   synchronousCommit: "on"
-
-imagePullSecrets:
-  - name: regcred  # optional, if your cluster requires Docker Hub authentication
