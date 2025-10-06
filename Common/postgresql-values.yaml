@@ -30,8 +30,7 @@ primary:
 
   resourcesPreset: medium
 
-  # Sidecar removed (stdout logs used by Promtail)
-  sidecars: []
+
 
 readReplicas:
   replicaCount: 1
@@ -55,8 +54,6 @@ readReplicas:
 
   resourcesPreset: medium
 
-  # Sidecar removed (stdout logs used by Promtail)
-  sidecars: []
 
 replication:
   enabled: true
