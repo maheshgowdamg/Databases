@@ -27,7 +27,7 @@ primary:
 
   persistence:
     size: 2Gi
-    storageClass: local-storage
+    storageClass: local-path
 
   resourcesPreset: medium
 
@@ -50,7 +50,7 @@ readReplicas:
 
   persistence:
     size: 2Gi
-    storageClass: local-storage
+    storageClass: local-path
 
   resourcesPreset: medium
 
