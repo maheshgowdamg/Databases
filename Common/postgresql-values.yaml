@@ -27,10 +27,9 @@ primary:
 
   persistence:
     size: 2Gi
+    storageClass: local-storage
 
   resourcesPreset: medium
-
-
 
 readReplicas:
   replicaCount: 1
@@ -51,9 +50,9 @@ readReplicas:
 
   persistence:
     size: 2Gi
+    storageClass: local-storage
 
   resourcesPreset: medium
-
 
 replication:
   enabled: true
