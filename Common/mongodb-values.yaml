@@ -1,8 +1,9 @@
 global:
- 
+  compatibility:
+    openshift: false
 
 architecture: replicaset
-replicaCount: 1
+replicaCount: 2
 replicaSetName: rs0
 useStatefulSet: true
 
@@ -25,5 +26,3 @@ persistence:
   size: 1Gi
 
 resourcesPreset: small
-
-
