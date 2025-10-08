@@ -11,17 +11,16 @@ metrics:
   pgStatStatements: true
 
 primary:
-  # --- Shared volume for logs ---
   extraVolumes:
     - name: log-volume
-      emptyDir: {}
+      emptyDir: {} # or replace with persistentVolumeClaim for logs retention
 
   extendedConfiguration: |
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
 
-    # Logging configuration
+    # Logging
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -51,19 +50,17 @@ primary:
       cpu: 500m
       memory: 1Gi
 
-  # --- Mount shared log volume ---
   extraVolumeMounts:
     - name: log-volume
       mountPath: /bitnami/postgresql/logs
 
-  # --- Cleanup sidecar ---
   sidecars:
     - name: log-cleaner
-      image: "busybox:latest"
+      image: busybox:latest
       command:
         - /bin/sh
         - -c
-        - >
+        - |
           while true; do
             echo "Cleaning old logs for primary..."
             find /bitnami/postgresql/logs -name "*.log" -mtime +3 -exec rm {} \;
@@ -73,10 +70,13 @@ primary:
         - name: log-volume
           mountPath: /bitnami/postgresql/logs
 
+  env:
+    - name: POSTGRESQL_LOG_FILE
+      value: /bitnami/postgresql/logs/postgresql-$(date +%Y-%m-%d).log
+
 readReplicas:
   replicaCount: 1
 
-  # --- Shared volume for logs ---
   extraVolumes:
     - name: log-volume
       emptyDir: {}
@@ -86,7 +86,7 @@ readReplicas:
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
 
-    # Logging configuration
+    # Logging
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -116,19 +116,17 @@ readReplicas:
       cpu: 400m
       memory: 1Gi
 
-  # --- Mount shared log volume ---
   extraVolumeMounts:
     - name: log-volume
       mountPath: /bitnami/postgresql/logs
 
-  # --- Cleanup sidecar ---
   sidecars:
     - name: log-cleaner
-      image: "busybox:latest"
+      image: busybox:latest
       command:
         - /bin/sh
         - -c
-        - >
+        - |
           while true; do
             echo "Cleaning old logs for replica..."
             find /bitnami/postgresql/logs -name "*.log" -mtime +3 -exec rm {} \;
@@ -137,6 +135,10 @@ readReplicas:
       volumeMounts:
         - name: log-volume
           mountPath: /bitnami/postgresql/logs
+
+  env:
+    - name: POSTGRESQL_LOG_FILE
+      value: /bitnami/postgresql/logs/postgresql-$(date +%Y-%m-%d).log
 
 replication:
   enabled: true
