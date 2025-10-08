@@ -1,25 +1,23 @@
 architecture: replication
-
 global:
   postgresql:
     auth:
       existingSecret: postgresql
       database: postgres
-
 metrics:
   enabled: true
   pgStatStatements: true
-
 primary:
   extraVolumes:
     - name: log-volume
       emptyDir: {} # or replace with persistentVolumeClaim for logs retention
-
+    - name: otel-config
+      configMap:
+        name: otel-config
   extendedConfiguration: |
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
-
     # Logging
     log_destination = 'stderr'
     logging_collector = on
@@ -38,10 +36,8 @@ primary:
     track_io_timing = on
     log_autovacuum_min_duration = 1000
     temp_file_limit = '2GB'
-
   persistence:
     size: 2Gi
-
   resources:
     requests:
       cpu: 250m
@@ -49,11 +45,11 @@ primary:
     limits:
       cpu: 500m
       memory: 1Gi
-
   extraVolumeMounts:
     - name: log-volume
       mountPath: /bitnami/postgresql/logs
-
+    - name: otel-config
+      mountPath: /conf
   sidecars:
     - name: log-cleaner
       image: busybox:latest
@@ -69,23 +65,50 @@ primary:
       volumeMounts:
         - name: log-volume
           mountPath: /bitnami/postgresql/logs
-
+    - name: otel-collector
+      image: otel/opentelemetry-collector-contrib:0.137.0
+      command:
+        - /otelcol-contrib
+        - --config=/conf/otel-config.yaml
+      volumeMounts:
+        - name: otel-config
+          mountPath: /conf
+        - name: log-volume
+          mountPath: /bitnami/postgresql/logs
+          readOnly: true
+      env:
+        - name: POSTGRESQL_USERNAME
+          value: monitoring
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: otel-secrets
+              key: monitoring-password
+        - name: OTLP_DESTINATION_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: otel-secrets
+              key: otlp-endpoint
+        - name: SIGNOZ_INGESTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: otel-secrets
+              key: signoz-ingestion-key
   env:
     - name: POSTGRESQL_LOG_FILE
       value: /bitnami/postgresql/logs/postgresql-$(date +%Y-%m-%d).log
-
 readReplicas:
   replicaCount: 1
-
   extraVolumes:
     - name: log-volume
       emptyDir: {}
-
+    - name: otel-config
+      configMap:
+        name: otel-config
   extendedConfiguration: |
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
-
     # Logging
     log_destination = 'stderr'
     logging_collector = on
@@ -104,10 +127,8 @@ readReplicas:
     track_io_timing = on
     log_autovacuum_min_duration = 1000
     temp_file_limit = '2GB'
-
   persistence:
     size: 2Gi
-
   resources:
     requests:
       cpu: 200m
@@ -115,11 +136,11 @@ readReplicas:
     limits:
       cpu: 400m
       memory: 1Gi
-
   extraVolumeMounts:
     - name: log-volume
       mountPath: /bitnami/postgresql/logs
-
+    - name: otel-config
+      mountPath: /conf
   sidecars:
     - name: log-cleaner
       image: busybox:latest
@@ -135,11 +156,38 @@ readReplicas:
       volumeMounts:
         - name: log-volume
           mountPath: /bitnami/postgresql/logs
-
+    - name: otel-collector
+      image: otel/opentelemetry-collector-contrib:0.137.0
+      command:
+        - /otelcol-contrib
+        - --config=/conf/otel-config.yaml
+      volumeMounts:
+        - name: otel-config
+          mountPath: /conf
+        - name: log-volume
+          mountPath: /bitnami/postgresql/logs
+          readOnly: true
+      env:
+        - name: POSTGRESQL_USERNAME
+          value: monitoring
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: otel-secrets
+              key: monitoring-password
+        - name: OTLP_DESTINATION_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: otel-secrets
+              key: otlp-endpoint
+        - name: SIGNOZ_INGESTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: otel-secrets
+              key: signoz-ingestion-key
   env:
     - name: POSTGRESQL_LOG_FILE
       value: /bitnami/postgresql/logs/postgresql-$(date +%Y-%m-%d).log
-
 replication:
   enabled: true
   numSynchronousReplicas: 1
