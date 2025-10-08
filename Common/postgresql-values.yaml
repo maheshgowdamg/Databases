@@ -50,6 +50,10 @@ primary:
       mountPath: /bitnami/postgresql/logs
     - name: otel-config
       mountPath: /conf
+  securityContext:
+    runAsUser: 1001
+    runAsGroup: 1001
+    fsGroup: 1001
   sidecars:
     - name: log-cleaner
       image: busybox:latest
@@ -70,6 +74,9 @@ primary:
       command:
         - /otelcol-contrib
         - --config=/conf/otel-config.yaml
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
       volumeMounts:
         - name: otel-config
           mountPath: /conf
@@ -141,6 +148,10 @@ readReplicas:
       mountPath: /bitnami/postgresql/logs
     - name: otel-config
       mountPath: /conf
+  securityContext:
+    runAsUser: 1001
+    runAsGroup: 1001
+    fsGroup: 1001
   sidecars:
     - name: log-cleaner
       image: busybox:latest
@@ -161,6 +172,9 @@ readReplicas:
       command:
         - /otelcol-contrib
         - --config=/conf/otel-config.yaml
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
       volumeMounts:
         - name: otel-config
           mountPath: /conf
