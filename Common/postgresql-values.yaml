@@ -10,7 +10,7 @@ metrics:
 primary:
   extraVolumes:
     - name: log-volume
-      emptyDir: {} # or replace with persistentVolumeClaim for logs retention
+      emptyDir: {}
     - name: otel-config
       configMap:
         name: otel-config
@@ -22,7 +22,7 @@ primary:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_filename = 'postgresql.log'  # Changed to static name
     log_truncate_on_rotation = off
     log_rotation_age = 1d
     log_rotation_size = 0
@@ -63,7 +63,7 @@ primary:
         - |
           while true; do
             echo "Cleaning old logs for primary..."
-            find /bitnami/postgresql/logs -name "*.log" -mtime +3 -exec rm {} \;
+            find /bitnami/postgresql/logs -name "postgresql.log.*" -mtime +3 -exec rm {} \;
             sleep 3600
           done
       volumeMounts:
@@ -103,7 +103,7 @@ primary:
               key: signoz-ingestion-key
   env:
     - name: POSTGRESQL_LOG_FILE
-      value: /bitnami/postgresql/logs/postgresql-$(date +%Y-%m-%d).log
+      value: /bitnami/postgresql/logs/postgresql.log  # Updated to static name
 readReplicas:
   replicaCount: 1
   extraVolumes:
@@ -120,7 +120,7 @@ readReplicas:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_filename = 'postgresql.log'  # Changed to static name
     log_truncate_on_rotation = off
     log_rotation_age = 1d
     log_rotation_size = 0
@@ -161,7 +161,7 @@ readReplicas:
         - |
           while true; do
             echo "Cleaning old logs for replica..."
-            find /bitnami/postgresql/logs -name "*.log" -mtime +3 -exec rm {} \;
+            find /bitnami/postgresql/logs -name "postgresql.log.*" -mtime +3 -exec rm {} \;
             sleep 3600
           done
       volumeMounts:
@@ -201,7 +201,7 @@ readReplicas:
               key: signoz-ingestion-key
   env:
     - name: POSTGRESQL_LOG_FILE
-      value: /bitnami/postgresql/logs/postgresql-$(date +%Y-%m-%d).log
+      value: /bitnami/postgresql/logs/postgresql.log  # Updated to static name
 replication:
   enabled: true
   numSynchronousReplicas: 1
