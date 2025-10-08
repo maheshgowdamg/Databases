@@ -22,7 +22,7 @@ primary:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql.log'  # Changed to static name
+    log_filename = 'postgresql.log'
     log_truncate_on_rotation = off
     log_rotation_age = 1d
     log_rotation_size = 0
@@ -91,6 +91,10 @@ primary:
             secretKeyRef:
               name: otel-secrets
               key: monitoring-password
+        - name: POSTGRESQL_ENDPOINT
+          value: postgresql-primary.dev.svc.cluster.local:5432
+        - name: POSTGRESQL_LOG_FILE
+          value: /bitnami/postgresql/logs/postgresql.log
         - name: OTLP_DESTINATION_ENDPOINT
           valueFrom:
             secretKeyRef:
@@ -101,9 +105,6 @@ primary:
             secretKeyRef:
               name: otel-secrets
               key: signoz-ingestion-key
-  env:
-    - name: POSTGRESQL_LOG_FILE
-      value: /bitnami/postgresql/logs/postgresql.log  # Updated to static name
 readReplicas:
   replicaCount: 1
   extraVolumes:
@@ -120,7 +121,7 @@ readReplicas:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql.log'  # Changed to static name
+    log_filename = 'postgresql.log'
     log_truncate_on_rotation = off
     log_rotation_age = 1d
     log_rotation_size = 0
@@ -189,6 +190,10 @@ readReplicas:
             secretKeyRef:
               name: otel-secrets
               key: monitoring-password
+        - name: POSTGRESQL_ENDPOINT
+          value: postgresql-primary.dev.svc.cluster.local:5432
+        - name: POSTGRESQL_LOG_FILE
+          value: /bitnami/postgresql/logs/postgresql.log
         - name: OTLP_DESTINATION_ENDPOINT
           valueFrom:
             secretKeyRef:
@@ -199,9 +204,6 @@ readReplicas:
             secretKeyRef:
               name: otel-secrets
               key: signoz-ingestion-key
-  env:
-    - name: POSTGRESQL_LOG_FILE
-      value: /bitnami/postgresql/logs/postgresql.log  # Updated to static name
 replication:
   enabled: true
   numSynchronousReplicas: 1
