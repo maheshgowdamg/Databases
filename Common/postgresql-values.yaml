@@ -59,7 +59,7 @@ primary:
   sidecars:
     - name: log-cleaner
       image: busybox:latest
-      command: ["/bin/sh", "-c", "while true; do echo 'Cleaning old logs for primary...'; find /bitnami/postgresql/logs -name 'postgresql.log.*' -mtime +3 -exec rm {} \\;; sleep 3600; done"]
+      command: ["/bin/sh", "-c", "while true; do echo 'Cleaning old logs...'; find /bitnami/postgresql/logs -name 'postgresql.log.*' -mtime +3 -exec rm {} \\;; sleep 3600; done"]
       volumeMounts:
         - name: log-volume
           mountPath: /bitnami/postgresql/logs
@@ -76,17 +76,6 @@ primary:
           mountPath: /bitnami/postgresql/logs
           readOnly: true
       env:
-        - name: POSTGRESQL_USERNAME
-          value: monitoring
-        - name: POSTGRESQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: otel-secrets
-              key: monitoring-password
-        - name: POSTGRESQL_ENDPOINT
-          value: postgresql-primary-metrics.dev.svc.cluster.local:9187
-        - name: POSTGRESQL_LOG_FILE
-          value: /bitnami/postgresql/logs/postgresql.log
         - name: OTLP_DESTINATION_ENDPOINT
           valueFrom:
             secretKeyRef:
@@ -147,7 +136,7 @@ readReplicas:
   sidecars:
     - name: log-cleaner
       image: busybox:latest
-      command: ["/bin/sh", "-c", "while true; do echo 'Cleaning old logs for replica...'; find /bitnami/postgresql/logs -name 'postgresql.log.*' -mtime +3 -exec rm {} \\;; sleep 3600; done"]
+      command: ["/bin/sh", "-c", "while true; do echo 'Cleaning old logs...'; find /bitnami/postgresql/logs -name 'postgresql.log.*' -mtime +3 -exec rm {} \\;; sleep 3600; done"]
       volumeMounts:
         - name: log-volume
           mountPath: /bitnami/postgresql/logs
@@ -164,17 +153,6 @@ readReplicas:
           mountPath: /bitnami/postgresql/logs
           readOnly: true
       env:
-        - name: POSTGRESQL_USERNAME
-          value: monitoring
-        - name: POSTGRESQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: otel-secrets
-              key: monitoring-password
-        - name: POSTGRESQL_ENDPOINT
-          value: postgresql-primary-metrics.dev.svc.cluster.local:9187
-        - name: POSTGRESQL_LOG_FILE
-          value: /bitnami/postgresql/logs/postgresql.log
         - name: OTLP_DESTINATION_ENDPOINT
           valueFrom:
             secretKeyRef:
