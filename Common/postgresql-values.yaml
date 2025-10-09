@@ -3,7 +3,7 @@ architecture: replication
 global:
   postgresql:
     auth:
-      existingSecret: postgresql   # Secret must contain postgres user/password
+      existingSecret: postgresql
       database: postgres
 
 metrics:
@@ -37,11 +37,14 @@ primary:
     - name: otel-config
       configMap:
         name: otel-postgres-config
+    - name: postgresql-logs
+      emptyDir: {}    # temporary volume to mount logs to sidecar
   extraVolumeMounts:
     - name: otel-config
       mountPath: /etc/otel/config
       readOnly: true
-    - mountPath: /bitnami/postgresql/logs
+    - name: postgresql-logs
+      mountPath: /bitnami/postgresql/logs
       readOnly: true
   sidecars:
     - name: otel-collector
@@ -65,7 +68,8 @@ primary:
         - name: otel-config
           mountPath: /etc/otel/config
           readOnly: true
-        - mountPath: /bitnami/postgresql/logs
+        - name: postgresql-logs
+          mountPath: /bitnami/postgresql/logs
           readOnly: true
 
 readReplicas:
@@ -91,11 +95,14 @@ readReplicas:
     - name: otel-config
       configMap:
         name: otel-postgres-config
+    - name: postgresql-logs
+      emptyDir: {}
   extraVolumeMounts:
     - name: otel-config
       mountPath: /etc/otel/config
       readOnly: true
-    - mountPath: /bitnami/postgresql/logs
+    - name: postgresql-logs
+      mountPath: /bitnami/postgresql/logs
       readOnly: true
   sidecars:
     - name: otel-collector
@@ -119,7 +126,8 @@ readReplicas:
         - name: otel-config
           mountPath: /etc/otel/config
           readOnly: true
-        - mountPath: /bitnami/postgresql/logs
+        - name: postgresql-logs
+          mountPath: /bitnami/postgresql/logs
           readOnly: true
 
 replication:
