@@ -17,7 +17,6 @@ metrics:
 
 primary:
   extendedConfiguration: |
-    # Connection & replication
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
@@ -34,14 +33,16 @@ primary:
   persistence:
     size: 2Gi
   resourcesPreset: medium
-  extraVolumeMounts:
-    - name: otel-config
-      mountPath: /etc/otel/config
-      readOnly: true
   extraVolumes:
     - name: otel-config
       configMap:
         name: otel-postgres-config
+  extraVolumeMounts:
+    - name: otel-config
+      mountPath: /etc/otel/config
+      readOnly: true
+    - mountPath: /bitnami/postgresql/logs
+      readOnly: true
   sidecars:
     - name: otel-collector
       image: otel/opentelemetry-collector-contrib:0.88.0
@@ -64,8 +65,7 @@ primary:
         - name: otel-config
           mountPath: /etc/otel/config
           readOnly: true
-        - name: data-postgresql-primary-0
-          mountPath: /bitnami/postgresql
+        - mountPath: /bitnami/postgresql/logs
           readOnly: true
 
 readReplicas:
@@ -74,6 +74,8 @@ readReplicas:
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+
+    # Logging
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -85,14 +87,16 @@ readReplicas:
   persistence:
     size: 2Gi
   resourcesPreset: medium
-  extraVolumeMounts:
-    - name: otel-config
-      mountPath: /etc/otel/config
-      readOnly: true
   extraVolumes:
     - name: otel-config
       configMap:
         name: otel-postgres-config
+  extraVolumeMounts:
+    - name: otel-config
+      mountPath: /etc/otel/config
+      readOnly: true
+    - mountPath: /bitnami/postgresql/logs
+      readOnly: true
   sidecars:
     - name: otel-collector
       image: otel/opentelemetry-collector-contrib:0.88.0
@@ -115,8 +119,7 @@ readReplicas:
         - name: otel-config
           mountPath: /etc/otel/config
           readOnly: true
-        - name: data-postgresql-read-0
-          mountPath: /bitnami/postgresql
+        - mountPath: /bitnami/postgresql/logs
           readOnly: true
 
 replication:
