@@ -7,166 +7,88 @@ global:
 metrics:
   enabled: true
   pgStatStatements: true
-  service:
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "9187"
-      prometheus.io/path: "/metrics"
-    ports:
-      metrics: 9187
 primary:
-  extraVolumes:
-    - name: log-volume
-      emptyDir: {}
-    - name: otel-config
-      configMap:
-        name: otel-config
   extendedConfiguration: |
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+    # Logging settings
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql.log'
-    log_truncate_on_rotation = off
-    log_rotation_age = 1d
-    log_rotation_size = 0
-    log_line_prefix = '%m [%p] %q%u@%d %r %a '
-    log_error_verbosity = default
+    log_filename = 'postgresql-%Y-%m-%d.log'  # Daily unique file
+    log_truncate_on_rotation = off  # Append if same name (but name changes daily)
+    log_rotation_age = 0  # Disable extra time rotation (filename handles it)
+    log_connections = off
+    log_disconnections = off
     log_min_duration_statement = 1000
     log_statement = 'all'
-    log_checkpoints = on
-    log_lock_waits = on
-    deadlock_timeout = '2s'
-    track_io_timing = on
-    log_autovacuum_min_duration = 1000
-    temp_file_limit = '2GB'
   persistence:
     size: 2Gi
-  resources:
-    requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
-      cpu: 500m
-      memory: 1Gi
-  extraVolumeMounts:
-    - name: log-volume
-      mountPath: /bitnami/postgresql/logs
-    - name: otel-config
-      mountPath: /conf
-  securityContext:
-    runAsUser: 1001
-    runAsGroup: 1001
-    fsGroup: 1001
+  resourcesPreset: medium
   sidecars:
-    - name: log-cleaner
-      image: busybox:latest
-      command: ["/bin/sh", "-c", "while true; do echo 'Cleaning old logs...'; find /bitnami/postgresql/logs -name 'postgresql.log.*' -mtime +3 -exec rm {} \\;; sleep 3600; done"]
-      volumeMounts:
-        - name: log-volume
-          mountPath: /bitnami/postgresql/logs
-    - name: otel-collector
-      image: otel/opentelemetry-collector-contrib:0.137.0
-      command: ["/otelcol-contrib", "--config=/conf/otel-config.yaml"]
-      securityContext:
-        runAsUser: 1001
-        runAsGroup: 1001
-      volumeMounts:
-        - name: otel-config
-          mountPath: /conf
-        - name: log-volume
-          mountPath: /bitnami/postgresql/logs
-          readOnly: true
-      env:
-        - name: OTLP_DESTINATION_ENDPOINT
-          valueFrom:
-            secretKeyRef:
-              name: otel-secrets
-              key: otlp-endpoint
-        - name: SIGNOZ_INGESTION_KEY
-          valueFrom:
-            secretKeyRef:
-              name: otel-secrets
-              key: signoz-ingestion-key
+  - name: log-cleaner
+    image: busybox:1.36
+    command:
+    - /bin/sh
+    - -c
+    - |
+      while true; do
+        find /logs -type f -name 'postgresql-*.log' -mtime +3 -delete;
+        sleep 3600;
+      done
+    volumeMounts:
+    - name: data
+      mountPath: /logs
+      subPath: logs
+    resources:
+      limits:
+        cpu: 50m
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
 readReplicas:
   replicaCount: 1
-  extraVolumes:
-    - name: log-volume
-      emptyDir: {}
-    - name: otel-config
-      configMap:
-        name: otel-config
   extendedConfiguration: |
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+    # Logging settings
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql.log'
-    log_truncate_on_rotation = off
-    log_rotation_age = 1d
-    log_rotation_size = 0
-    log_line_prefix = '%m [%p] %q%u@%d %r %a '
-    log_error_verbosity = default
+    log_filename = 'postgresql-%Y-%m-%d.log'  # Daily unique file
+    log_truncate_on_rotation = off  # Append if same name (but name changes daily)
+    log_rotation_age = 0  # Disable extra time rotation (filename handles it)
+    log_disconnections = off
     log_min_duration_statement = 1000
     log_statement = 'all'
-    log_checkpoints = on
-    log_lock_waits = on
-    deadlock_timeout = '2s'
-    track_io_timing = on
-    log_autovacuum_min_duration = 1000
-    temp_file_limit = '2GB'
   persistence:
     size: 2Gi
-  resources:
-    requests:
-      cpu: 200m
-      memory: 512Mi
-    limits:
-      cpu: 400m
-      memory: 1Gi
-  extraVolumeMounts:
-    - name: log-volume
-      mountPath: /bitnami/postgresql/logs
-    - name: otel-config
-      mountPath: /conf
-  securityContext:
-    runAsUser: 1001
-    runAsGroup: 1001
-    fsGroup: 1001
+  resourcesPreset: medium
   sidecars:
-    - name: log-cleaner
-      image: busybox:latest
-      command: ["/bin/sh", "-c", "while true; do echo 'Cleaning old logs...'; find /bitnami/postgresql/logs -name 'postgresql.log.*' -mtime +3 -exec rm {} \\;; sleep 3600; done"]
-      volumeMounts:
-        - name: log-volume
-          mountPath: /bitnami/postgresql/logs
-    - name: otel-collector
-      image: otel/opentelemetry-collector-contrib:0.137.0
-      command: ["/otelcol-contrib", "--config=/conf/otel-config.yaml"]
-      securityContext:
-        runAsUser: 1001
-        runAsGroup: 1001
-      volumeMounts:
-        - name: otel-config
-          mountPath: /conf
-        - name: log-volume
-          mountPath: /bitnami/postgresql/logs
-          readOnly: true
-      env:
-        - name: OTLP_DESTINATION_ENDPOINT
-          valueFrom:
-            secretKeyRef:
-              name: otel-secrets
-              key: otlp-endpoint
-        - name: SIGNOZ_INGESTION_KEY
-          valueFrom:
-            secretKeyRef:
-              name: otel-secrets
-              key: signoz-ingestion-key
+  - name: log-cleaner
+    image: busybox:1.36
+    command:
+    - /bin/sh
+    - -c
+    - |
+      while true; do
+        find /logs -type f -name 'postgresql-*.log' -mtime +3 -delete;
+        sleep 3600;
+      done
+    volumeMounts:
+    - name: data
+      mountPath: /logs
+      subPath: logs
+    resources:
+      limits:
+        cpu: 50m
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
 replication:
   enabled: true
   numSynchronousReplicas: 1
