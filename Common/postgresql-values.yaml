@@ -3,7 +3,7 @@ architecture: replication
 global:
   postgresql:
     auth:
-      existingSecret: postgresql
+      existingSecret: postgresql  # Secret must contain postgres user/password
       database: postgres
 
 metrics:
@@ -30,22 +30,26 @@ primary:
     log_rotation_age = 0
     log_min_duration_statement = 1000
     log_statement = 'all'
+
   persistence:
     size: 2Gi
+
   resourcesPreset: medium
+
+  # Shared volumes for sidecar
   extraVolumes:
     - name: otel-config
       configMap:
         name: otel-postgres-config
     - name: postgresql-logs
-      emptyDir: {}    # temporary volume to mount logs to sidecar
+      emptyDir: {}   # temporary shared volume
+
+  # Main container mounts only logs for writing
   extraVolumeMounts:
-    - name: otel-config
-      mountPath: /etc/otel/config
-      readOnly: true
     - name: postgresql-logs
       mountPath: /bitnami/postgresql/logs
-      readOnly: true
+      readOnly: false
+
   sidecars:
     - name: otel-collector
       image: otel/opentelemetry-collector-contrib:0.88.0
@@ -64,7 +68,14 @@ primary:
         limits:
           cpu: 500m
           memory: 512Mi
-      volumeMounts:
+      # Sidecar mounts OTEL config + logs (read-only)
+      extraVolumes:
+        - name: otel-config
+          configMap:
+            name: otel-postgres-config
+        - name: postgresql-logs
+          emptyDir: {}
+      extraVolumeMounts:
         - name: otel-config
           mountPath: /etc/otel/config
           readOnly: true
@@ -79,7 +90,6 @@ readReplicas:
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
 
-    # Logging
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -88,22 +98,24 @@ readReplicas:
     log_rotation_age = 0
     log_min_duration_statement = 1000
     log_statement = 'all'
+
   persistence:
     size: 2Gi
+
   resourcesPreset: medium
+
   extraVolumes:
     - name: otel-config
       configMap:
         name: otel-postgres-config
     - name: postgresql-logs
       emptyDir: {}
+
   extraVolumeMounts:
-    - name: otel-config
-      mountPath: /etc/otel/config
-      readOnly: true
     - name: postgresql-logs
       mountPath: /bitnami/postgresql/logs
-      readOnly: true
+      readOnly: false
+
   sidecars:
     - name: otel-collector
       image: otel/opentelemetry-collector-contrib:0.88.0
@@ -122,7 +134,13 @@ readReplicas:
         limits:
           cpu: 500m
           memory: 512Mi
-      volumeMounts:
+      extraVolumes:
+        - name: otel-config
+          configMap:
+            name: otel-postgres-config
+        - name: postgresql-logs
+          emptyDir: {}
+      extraVolumeMounts:
         - name: otel-config
           mountPath: /etc/otel/config
           readOnly: true
