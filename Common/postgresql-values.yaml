@@ -30,6 +30,7 @@ primary:
     log_rotation_age = 0
     log_min_duration_statement = 1000
     log_statement = 'all'
+
   persistence:
     size: 2Gi
   resourcesPreset: medium
@@ -38,14 +39,14 @@ primary:
       configMap:
         name: otel-postgres-config
     - name: postgresql-logs
-      emptyDir: {}
+      emptyDir: {}    # writable temporary volume for logs
   extraVolumeMounts:
     - name: otel-config
       mountPath: /etc/otel/config
       readOnly: true
     - name: postgresql-logs
       mountPath: /bitnami/postgresql/logs
-      readOnly: true
+      readOnly: false
   sidecars:
     - name: otel-collector
       image: otel/opentelemetry-collector-contrib:0.88.0
@@ -70,7 +71,7 @@ primary:
           readOnly: true
         - name: postgresql-logs
           mountPath: /bitnami/postgresql/logs
-          readOnly: true
+          readOnly: false
 
 readReplicas:
   replicaCount: 1
@@ -88,6 +89,7 @@ readReplicas:
     log_rotation_age = 0
     log_min_duration_statement = 1000
     log_statement = 'all'
+
   persistence:
     size: 2Gi
   resourcesPreset: medium
@@ -103,7 +105,7 @@ readReplicas:
       readOnly: true
     - name: postgresql-logs
       mountPath: /bitnami/postgresql/logs
-      readOnly: true
+      readOnly: false
   sidecars:
     - name: otel-collector
       image: otel/opentelemetry-collector-contrib:0.88.0
@@ -128,7 +130,7 @@ readReplicas:
           readOnly: true
         - name: postgresql-logs
           mountPath: /bitnami/postgresql/logs
-          readOnly: true
+          readOnly: false
 
 replication:
   enabled: true
