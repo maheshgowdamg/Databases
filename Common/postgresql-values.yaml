@@ -3,7 +3,7 @@ architecture: replication
 global:
   postgresql:
     auth:
-      existingSecret: postgresql
+      existingSecret: postgresql   # Secret must contain postgres user/password
       database: postgres
 
 metrics:
@@ -17,9 +17,12 @@ metrics:
 
 primary:
   extendedConfiguration: |
+    # Connection & replication
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+
+    # Logging
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -31,6 +34,39 @@ primary:
   persistence:
     size: 2Gi
   resourcesPreset: medium
+  extraVolumeMounts:
+    - name: otel-config
+      mountPath: /etc/otel/config
+      readOnly: true
+  extraVolumes:
+    - name: otel-config
+      configMap:
+        name: otel-postgres-config
+  sidecars:
+    - name: otel-collector
+      image: otel/opentelemetry-collector-contrib:0.88.0
+      args:
+        - "--config"
+        - "/etc/otel/config/postgres-metrics-collection-config.yaml"
+        - "--config"
+        - "/etc/otel/config/postgres-logs-collection-config.yaml"
+      envFrom:
+        - secretRef:
+            name: postgres-env-secret
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      volumeMounts:
+        - name: otel-config
+          mountPath: /etc/otel/config
+          readOnly: true
+        - name: data-postgresql-primary-0
+          mountPath: /bitnami/postgresql
+          readOnly: true
 
 readReplicas:
   replicaCount: 1
@@ -49,6 +85,39 @@ readReplicas:
   persistence:
     size: 2Gi
   resourcesPreset: medium
+  extraVolumeMounts:
+    - name: otel-config
+      mountPath: /etc/otel/config
+      readOnly: true
+  extraVolumes:
+    - name: otel-config
+      configMap:
+        name: otel-postgres-config
+  sidecars:
+    - name: otel-collector
+      image: otel/opentelemetry-collector-contrib:0.88.0
+      args:
+        - "--config"
+        - "/etc/otel/config/postgres-metrics-collection-config.yaml"
+        - "--config"
+        - "/etc/otel/config/postgres-logs-collection-config.yaml"
+      envFrom:
+        - secretRef:
+            name: postgres-env-secret
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      volumeMounts:
+        - name: otel-config
+          mountPath: /etc/otel/config
+          readOnly: true
+        - name: data-postgresql-read-0
+          mountPath: /bitnami/postgresql
+          readOnly: true
 
 replication:
   enabled: true
