@@ -8,6 +8,10 @@ metrics:
   enabled: true
   pgStatStatements: true
   service:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9187"
+      prometheus.io/path: "/metrics"
     ports:
       metrics: 9187
 primary:
