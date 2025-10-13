@@ -7,6 +7,10 @@ global:
 metrics:
   enabled: true
   pgStatStatements: true
+
+# =============================================================
+# Primary Replica Configuration
+# =============================================================
 primary:
   extendedConfiguration: |
     max_connections = 3001
@@ -16,9 +20,9 @@ primary:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql-%Y-%m-%d.log'  # Daily unique file
-    log_truncate_on_rotation = off  # Append if same name (but name changes daily)
-    log_rotation_age = 0  # Disable extra time rotation (filename handles it)
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_truncate_on_rotation = off
+    log_rotation_age = 0
     log_connections = off
     log_disconnections = off
     log_min_duration_statement = 1000
@@ -26,28 +30,56 @@ primary:
   persistence:
     size: 2Gi
   resourcesPreset: medium
+
+  # --- Additions for SigNoz OTEL Collector ---
+  extraEnvFrom:
+    - secretRef:
+        name: postgres-env-secret
+  extraVolumes:
+    - name: otel-config-volume
+      configMap:
+        name: otel-postgres-config
+  # --- End Additions ---
+
   sidecars:
   - name: log-cleaner
+    # ... (your existing log-cleaner config) ...
     image: busybox:1.36
-    command:
-    - /bin/sh
-    - -c
-    - |
-      while true; do
-        find /logs -type f -name 'postgresql-*.log' -mtime +3 -delete;
-        sleep 3600;
-      done
+    command: ["/bin/sh", "-c", "while true; do find /logs -type f -name 'postgresql-*.log' -mtime +3 -delete; sleep 3600; done"]
     volumeMounts:
     - name: data
       mountPath: /logs
       subPath: logs
     resources:
+      limits: { cpu: 50m, memory: 64Mi }
+      requests: { cpu: 10m, memory: 32Mi }
+
+  # --- Additions for SigNoz OTEL Collector ---
+  - name: otel-collector
+    image: otel/opentelemetry-collector-contrib:0.90.1
+    imagePullPolicy: IfNotPresent
+    command:
+      - "/otelcol-contrib"
+      - "--config=/conf/otel-collector-config.yaml"
+    resources:
       limits:
-        cpu: 50m
-        memory: 64Mi
+        cpu: 200m
+        memory: 256Mi
       requests:
-        cpu: 10m
-        memory: 32Mi
+        cpu: 100m
+        memory: 128Mi
+    volumeMounts:
+      - name: otel-config-volume
+        mountPath: /conf
+      - name: data
+        mountPath: /bitnami/postgresql/logs
+        subPath: logs
+        readOnly: true
+  # --- End Additions ---
+
+# =============================================================
+# Read Replicas Configuration
+# =============================================================
 readReplicas:
   replicaCount: 1
   extendedConfiguration: |
@@ -58,37 +90,65 @@ readReplicas:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql-%Y-%m-%d.log'  # Daily unique file
-    log_truncate_on_rotation = off  # Append if same name (but name changes daily)
-    log_rotation_age = 0  # Disable extra time rotation (filename handles it)
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_truncate_on_rotation = off
+    log_rotation_age = 0
     log_disconnections = off
     log_min_duration_statement = 1000
     log_statement = 'all'
   persistence:
     size: 2Gi
   resourcesPreset: medium
+
+  # --- Additions for SigNoz OTEL Collector ---
+  extraEnvFrom:
+    - secretRef:
+        name: postgres-env-secret
+  extraVolumes:
+    - name: otel-config-volume
+      configMap:
+        name: otel-postgres-config
+  # --- End Additions ---
+
   sidecars:
   - name: log-cleaner
+    # ... (your existing log-cleaner config) ...
     image: busybox:1.36
-    command:
-    - /bin/sh
-    - -c
-    - |
-      while true; do
-        find /logs -type f -name 'postgresql-*.log' -mtime +3 -delete;
-        sleep 3600;
-      done
+    command: ["/bin/sh", "-c", "while true; do find /logs -type f -name 'postgresql-*.log' -mtime +3 -delete; sleep 3600; done"]
     volumeMounts:
     - name: data
       mountPath: /logs
       subPath: logs
     resources:
+      limits: { cpu: 50m, memory: 64Mi }
+      requests: { cpu: 10m, memory: 32Mi }
+
+  # --- Additions for SigNoz OTEL Collector ---
+  - name: otel-collector
+    image: otel/opentelemetry-collector-contrib:0.90.1
+    imagePullPolicy: IfNotPresent
+    command:
+      - "/otelcol-contrib"
+      - "--config=/conf/otel-collector-config.yaml"
+    resources:
       limits:
-        cpu: 50m
-        memory: 64Mi
+        cpu: 200m
+        memory: 256Mi
       requests:
-        cpu: 10m
-        memory: 32Mi
+        cpu: 100m
+        memory: 128Mi
+    volumeMounts:
+      - name: otel-config-volume
+        mountPath: /conf
+      - name: data
+        mountPath: /bitnami/postgresql/logs
+        subPath: logs
+        readOnly: true
+  # --- End Additions ---
+
+# =============================================================
+# Replication Configuration
+# =============================================================
 replication:
   enabled: true
   numSynchronousReplicas: 1
