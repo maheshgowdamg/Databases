@@ -30,13 +30,13 @@ primary:
   persistence:
     size: 2Gi
   resourcesPreset: medium
-  extraEnvFrom:
-    - secretRef:
-        name: postgres-env-secret
+
+  # This volume is for the OTEL config file
   extraVolumes:
     - name: otel-config-volume
       configMap:
         name: otel-postgres-config
+
   sidecars:
   - name: log-cleaner
     # ... (your existing log-cleaner config - no changes here) ...
@@ -53,13 +53,17 @@ primary:
   - name: otel-collector
     image: otel/opentelemetry-collector-contrib:0.90.1
     imagePullPolicy: IfNotPresent
-    # --- START OF FIX ---
-    # Run the collector container as the postgres user (fsGroup 1001)
-    # This gives it permission to read the log files.
     securityContext:
       runAsUser: 1001
       fsGroup: 1001
+    
+    # --- START OF FIX ---
+    # Inject environment variables directly into this sidecar
+    envFrom:
+      - secretRef:
+          name: postgres-env-secret
     # --- END OF FIX ---
+
     command:
       - "/otelcol-contrib"
       - "--config=/conf/otel-collector-config.yaml"
@@ -100,13 +104,13 @@ readReplicas:
   persistence:
     size: 2Gi
   resourcesPreset: medium
-  extraEnvFrom:
-    - secretRef:
-        name: postgres-env-secret
+
+  # This volume is for the OTEL config file
   extraVolumes:
     - name: otel-config-volume
       configMap:
         name: otel-postgres-config
+
   sidecars:
   - name: log-cleaner
     # ... (your existing log-cleaner config - no changes here) ...
@@ -123,13 +127,17 @@ readReplicas:
   - name: otel-collector
     image: otel/opentelemetry-collector-contrib:0.90.1
     imagePullPolicy: IfNotPresent
-    # --- START OF FIX ---
-    # Run the collector container as the postgres user (fsGroup 1001)
-    # This gives it permission to read the log files.
     securityContext:
       runAsUser: 1001
       fsGroup: 1001
+      
+    # --- START OF FIX ---
+    # Inject environment variables directly into this sidecar
+    envFrom:
+      - secretRef:
+          name: postgres-env-secret
     # --- END OF FIX ---
+    
     command:
       - "/otelcol-contrib"
       - "--config=/conf/otel-collector-config.yaml"
