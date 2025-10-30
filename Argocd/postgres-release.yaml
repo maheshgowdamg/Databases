@@ -12,7 +12,8 @@ spec:
     # 1️⃣ Chart source (Bitnami PostgreSQL)
     - chart: postgresql
       repoURL: https://charts.bitnami.com/bitnami
-      targetRevision: 15.5.20
+      targetRevision: latest
+    
       helm:
         valueFiles:
           - $values/Common/postgresql-values.yaml
