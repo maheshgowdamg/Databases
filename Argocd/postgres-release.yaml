@@ -12,7 +12,7 @@ spec:
     # 1️⃣ Chart source (Bitnami PostgreSQL)
     - chart: postgresql
       repoURL: https://charts.bitnami.com/bitnami
-      targetRevision: "latest"
+      targetRevision: 18.0.0
     
       helm:
         valueFiles:
