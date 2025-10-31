@@ -18,7 +18,7 @@ primary:
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
     # Log rotation settings - keeps only 7 days automatically
-    log_filename = 'postgresql-%a.log'  # %a = day name (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
+    log_filename = 'postgresql-%Y-%m-%d.log'  # %a = day name (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
     log_rotation_age = '1d'             # Rotate logs daily at midnight
     log_rotation_size = 0               # Disable size-based rotation (time-based only)
     log_truncate_on_rotation = on       # Overwrite old log when rotating (keeps only 7 days)
@@ -42,7 +42,7 @@ readReplicas:
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
     # Log rotation settings - keeps only 7 days automatically
-    log_filename = 'postgresql-%a.log'  # %a = day name (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
+    log_filename = 'postgresql-%Y-%m-%d.log'  # %a = day name (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
     log_rotation_age = '1d'             # Rotate logs daily at midnight
     log_rotation_size = 0               # Disable size-based rotation (time-based only)
     log_truncate_on_rotation = on       # Overwrite old log when rotating (keeps only 7 days)
