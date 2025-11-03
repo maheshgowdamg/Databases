@@ -23,7 +23,7 @@ primary:
     log_rotation_size = 0               # Disable size-based rotation (time-based only)
     log_truncate_on_rotation = on       # Overwrite old log when rotating (keeps only 7 days)
     log_file_mode = 0600                # Secure file permissions (read/write for owner only)
-    log_rotation_program = 'gzip -f %p' 
+
     log_connections = off
     log_disconnections = off
     log_min_duration_statement = 1000
@@ -48,7 +48,7 @@ readReplicas:
     log_rotation_size = 0               # Disable size-based rotation (time-based only)
     log_truncate_on_rotation = on       # Overwrite old log when rotating (keeps only 7 days)
     log_file_mode = 0600                # Secure file permissions (read/write for owner only)
-    log_rotation_program = 'gzip -f %p' 
+
     log_disconnections = off
     log_min_duration_statement = 1000
     log_statement = 'all'
