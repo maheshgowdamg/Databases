@@ -3,11 +3,7 @@ kind: Application
 metadata:
   name: postgresql
   namespace: argocd
-  annotations:
-    notifications.argoproj.io/subscribe.on-sync-succeeded.mattermost: "true"
-    notifications.argoproj.io/subscribe.on-sync-failed.mattermost: "true"
-    notifications.argoproj.io/subscribe.on-outofsync.mattermost: "true"
-    notifications.argoproj.io/subscribe.on-degraded.mattermost: "true"
+
 spec:
   project: default
   destination:
