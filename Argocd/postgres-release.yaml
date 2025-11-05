@@ -4,10 +4,12 @@ metadata:
   name: postgresql
   namespace: argocd
   annotations:
-    notifications.argoproj.io/subscribe.on-sync-succeeded.mattermost: "true"
-    notifications.argoproj.io/subscribe.on-sync-failed.mattermost: "true"
-    notifications.argoproj.io/subscribe.on-outofsync.mattermost: "true"
-    notifications.argoproj.io/subscribe.on-degraded.mattermost: "true"
+  # For incoming webhook mode you can use an empty value or channel id.
+  # If you're using a Mattermost bot token you'll need to use the channel ID.
+  notifications.argoproj.io/subscribe.on-sync-succeeded.mattermost: ""
+  notifications.argoproj.io/subscribe.on-sync-failed.mattermost: ""
+  notifications.argoproj.io/subscribe.on-outofsync.mattermost: ""
+  notifications.argoproj.io/subscribe.on-degraded.mattermost: ""
 
 spec:
   project: default
