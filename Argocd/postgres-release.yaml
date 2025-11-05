@@ -4,9 +4,9 @@ metadata:
   name: postgresql
   namespace: argocd
   annotations:
-  notifications.argoproj.io/subscribe.on-health-degraded.mattermost: ""
-  notifications.argoproj.io/subscribe.on-sync-status-unknown.mattermost: ""
-  notifications.argoproj.io/subscribe.on-sync-failed.mattermost: ""
+    notifications.argoproj.io/subscribe.on-health-degraded.mattermost: ""
+    notifications.argoproj.io/subscribe.on-sync-status-unknown.mattermost: ""
+    notifications.argoproj.io/subscribe.on-sync-failed.mattermost: ""
 
 spec:
   project: default
