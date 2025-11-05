@@ -4,9 +4,9 @@ metadata:
   name: postgresql
   namespace: argocd
   annotations:
-    # REMOVED the undefined triggers.
-    # ONLY subscribing to the one you have defined.
-    notifications.argoproj.io/subscribe.on-sync-failed.mattermost: ""
+    notifications.argoproj.io/subscribe.on-sync-succeeded.mattermost: "true"
+    notifications.argoproj.io/subscribe.on-sync-failed.mattermost: "true"
+    notifications.argoproj.io/subscribe.on-outofsync.mattermost: "true"
 
 spec:
   project: default
