@@ -13,16 +13,20 @@ primary:
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+
     # Logging settings
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    # Log rotation settings - keeps only 7 days automatically
-    log_filename = 'postgresql-%Y-%m-%d.log'  # %a = day name (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
-    log_rotation_age = '1d'             # Rotate logs daily at midnight
-    log_rotation_size = 0               # Disable size-based rotation (time-based only)
-    log_truncate_on_rotation = on       # Overwrite old log when rotating (keeps only 7 days)
-    log_file_mode = 0600                # Secure file permissions (read/write for owner only)
+
+    # Daily log rotation + keep only last 3 days
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_rotation_age = '1d'
+    log_rotation_size = 0
+    log_truncate_on_rotation = on
+    archive_cleanup_command = 'find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete'
+
+    log_file_mode = 0600
 
     log_connections = off
     log_disconnections = off
@@ -38,16 +42,20 @@ readReplicas:
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+
     # Logging settings
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    # Log rotation settings - keeps only 7 days automatically
-    log_filename = 'postgresql-%Y-%m-%d.log'  # %a = day name (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
-    log_rotation_age = '1d'             # Rotate logs daily at midnight
-    log_rotation_size = 0               # Disable size-based rotation (time-based only)
-    log_truncate_on_rotation = on       # Overwrite old log when rotating (keeps only 7 days)
-    log_file_mode = 0600                # Secure file permissions (read/write for owner only)
+
+    # Daily log rotation + keep only last 3 days
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_rotation_age = '1d'
+    log_rotation_size = 0
+    log_truncate_on_rotation = on
+    archive_cleanup_command = 'find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete'
+
+    log_file_mode = 0600
 
     log_disconnections = off
     log_min_duration_statement = 1000
