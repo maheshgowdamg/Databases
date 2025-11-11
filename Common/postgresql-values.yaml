@@ -11,7 +11,7 @@ metrics:
   pgStatStatements: true
 
 primary:
-  lifecycleHooks:
+  containerLifecycle:
     postStart:
       exec:
         command:
@@ -25,7 +25,6 @@ primary:
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
 
-    # Logging settings
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -47,7 +46,7 @@ primary:
 readReplicas:
   replicaCount: 2
 
-  lifecycleHooks:
+  containerLifecycle:
     postStart:
       exec:
         command:
@@ -60,7 +59,6 @@ readReplicas:
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
-
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -68,7 +66,6 @@ readReplicas:
     log_rotation_age = '1d'
     log_rotation_size = 0
     log_truncate_on_rotation = on
-
     log_file_mode = 0600
     log_disconnections = off
     log_min_duration_statement = 1000
