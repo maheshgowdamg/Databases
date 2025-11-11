@@ -11,30 +11,6 @@ metrics:
   pgStatStatements: true
 
 primary:
-  extendedConfiguration: |
-    max_connections = 3001
-    shared_preload_libraries = 'pg_stat_statements'
-    pg_stat_statements.track = all
-
-    # Logging settings
-    log_destination = 'stderr'
-    logging_collector = on
-    log_directory = '/bitnami/postgresql/logs'
-
-    # Daily log rotation + readable filenames
-    log_filename = 'postgresql-%Y-%m-%d.log'
-    log_rotation_age = '1d'
-    log_rotation_size = 0
-    log_truncate_on_rotation = on
-
-    log_file_mode = 0600
-
-    log_connections = off
-    log_disconnections = off
-    log_min_duration_statement = 1000
-    log_statement = 'all'
-
-  # ✅ Automatic cleanup: remove logs older than 3 days
   podLifecycle:
     postStart:
       exec:
@@ -43,6 +19,26 @@ primary:
           - -c
           - |
             find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
+
+  extendedConfiguration: |
+    max_connections = 3001
+    shared_preload_libraries = 'pg_stat_statements'
+    pg_stat_statements.track = all
+
+    log_destination = 'stderr'
+    logging_collector = on
+    log_directory = '/bitnami/postgresql/logs'
+
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_rotation_age = '1d'
+    log_rotation_size = 0
+    log_truncate_on_rotation = on
+
+    log_file_mode = 0600
+    log_connections = off
+    log_disconnections = off
+    log_min_duration_statement = 1000
+    log_statement = 'all'
 
   persistence:
     size: 2Gi
@@ -51,29 +47,6 @@ primary:
 readReplicas:
   replicaCount: 2
 
-  extendedConfiguration: |
-    max_connections = 3001
-    shared_preload_libraries = 'pg_stat_statements'
-    pg_stat_statements.track = all
-
-    # Logging settings
-    log_destination = 'stderr'
-    logging_collector = on
-    log_directory = '/bitnami/postgresql/logs'
-
-    # Daily log rotation + readable filenames
-    log_filename = 'postgresql-%Y-%m-%d.log'
-    log_rotation_age = '1d'
-    log_rotation_size = 0
-    log_truncate_on_rotation = on
-
-    log_file_mode = 0600
-
-    log_disconnections = off
-    log_min_duration_statement = 1000
-    log_statement = 'all'
-
-  # ✅ Automatic cleanup for replica logs too
   podLifecycle:
     postStart:
       exec:
@@ -82,6 +55,25 @@ readReplicas:
           - -c
           - |
             find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
+
+  extendedConfiguration: |
+    max_connections = 3001
+    shared_preload_libraries = 'pg_stat_statements'
+    pg_stat_statements.track = all
+
+    log_destination = 'stderr'
+    logging_collector = on
+    log_directory = '/bitnami/postgresql/logs'
+
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_rotation_age = '1d'
+    log_rotation_size = 0
+    log_truncate_on_rotation = on
+
+    log_file_mode = 0600
+    log_disconnections = off
+    log_min_duration_statement = 1000
+    log_statement = 'all'
 
   persistence:
     size: 2Gi
