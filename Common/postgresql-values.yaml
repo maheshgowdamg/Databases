@@ -1,9 +1,11 @@
 architecture: replication
+
 global:
   postgresql:
     auth:
       existingSecret: postgresql
       database: postgres
+
 metrics:
   enabled: true
   pgStatStatements: true
@@ -19,12 +21,11 @@ primary:
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
 
-    # Daily log rotation + keep only last 3 days
+    # Daily log rotation + readable filenames
     log_filename = 'postgresql-%Y-%m-%d.log'
     log_rotation_age = '1d'
     log_rotation_size = 0
     log_truncate_on_rotation = on
-    archive_cleanup_command = 'find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete'
 
     log_file_mode = 0600
 
@@ -32,12 +33,24 @@ primary:
     log_disconnections = off
     log_min_duration_statement = 1000
     log_statement = 'all'
+
+  # ✅ Automatic cleanup: remove logs older than 3 days
+  podLifecycle:
+    postStart:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - |
+            find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
+
   persistence:
     size: 2Gi
   resourcesPreset: medium
 
 readReplicas:
   replicaCount: 2
+
   extendedConfiguration: |
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
@@ -48,18 +61,28 @@ readReplicas:
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
 
-    # Daily log rotation + keep only last 3 days
+    # Daily log rotation + readable filenames
     log_filename = 'postgresql-%Y-%m-%d.log'
     log_rotation_age = '1d'
     log_rotation_size = 0
     log_truncate_on_rotation = on
-    archive_cleanup_command = 'find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete'
 
     log_file_mode = 0600
 
     log_disconnections = off
     log_min_duration_statement = 1000
     log_statement = 'all'
+
+  # ✅ Automatic cleanup for replica logs too
+  podLifecycle:
+    postStart:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - |
+            find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
+
   persistence:
     size: 2Gi
   resourcesPreset: medium
