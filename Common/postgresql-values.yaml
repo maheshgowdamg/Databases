@@ -11,7 +11,7 @@ metrics:
   pgStatStatements: true
 
 primary:
-  podLifecycle:
+  lifecycleHooks:
     postStart:
       exec:
         command:
@@ -25,10 +25,10 @@ primary:
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
 
+    # Logging settings
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-
     log_filename = 'postgresql-%Y-%m-%d.log'
     log_rotation_age = '1d'
     log_rotation_size = 0
@@ -47,7 +47,7 @@ primary:
 readReplicas:
   replicaCount: 2
 
-  podLifecycle:
+  lifecycleHooks:
     postStart:
       exec:
         command:
@@ -64,7 +64,6 @@ readReplicas:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-
     log_filename = 'postgresql-%Y-%m-%d.log'
     log_rotation_age = '1d'
     log_rotation_size = 0
