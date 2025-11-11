@@ -10,6 +10,44 @@ metrics:
   enabled: true
   pgStatStatements: true
 
+  # Enable pg_stat_statements metrics export
+  extraFlags:
+    - --collector.stat_statements
+    - --extend.query-path=/conf/custom-metrics.yaml
+
+  # Custom slow query metrics for Grafana dashboards
+  customMetrics: |
+    pg_stat_statements_top_mean_time:
+      query: >
+        SELECT queryid::text,
+               regexp_replace(query, E'[\\n\\r\\s]+', ' ', 'g') AS query,
+               mean_time, calls, total_time
+        FROM pg_stat_statements
+        WHERE calls > 0
+        ORDER BY mean_time DESC
+        LIMIT 50;
+      metrics:
+        - queryid: { usage: "LABEL" }
+        - query: { usage: "LABEL" }
+        - mean_time: { usage: "GAUGE" }
+        - total_time: { usage: "GAUGE" }
+        - calls: { usage: "GAUGE" }
+
+    pg_stat_statements_top_total_time:
+      query: >
+        SELECT queryid::text,
+               regexp_replace(query, E'[\\n\\r\\s]+', ' ', 'g') AS query,
+               total_time, calls
+        FROM pg_stat_statements
+        WHERE calls > 0
+        ORDER BY total_time DESC
+        LIMIT 50;
+      metrics:
+        - queryid: { usage: "LABEL" }
+        - query: { usage: "LABEL" }
+        - total_time: { usage: "GAUGE" }
+        - calls: { usage: "GAUGE" }
+
 primary:
   lifecycleHooks:
     postStart:
@@ -24,6 +62,8 @@ primary:
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+
+    # Logging
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -34,8 +74,12 @@ primary:
     log_file_mode = 0600
     log_connections = off
     log_disconnections = off
+
+    # ✅ Slow query threshold (1 second)
     log_min_duration_statement = 1000
-    log_statement = 'all'
+
+    # ❗ REMOVE this to avoid logging every query (spam)
+    # log_statement = 'all'
 
   persistence:
     size: 2Gi
@@ -57,6 +101,7 @@ readReplicas:
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
+
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
@@ -66,8 +111,12 @@ readReplicas:
     log_truncate_on_rotation = on
     log_file_mode = 0600
     log_disconnections = off
+
+    # ✅ Slow query threshold (1 second)
     log_min_duration_statement = 1000
-    log_statement = 'all'
+
+    # ❗ REMOVE this also
+    # log_statement = 'all'
 
   persistence:
     size: 2Gi
