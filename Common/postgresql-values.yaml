@@ -18,7 +18,7 @@ primary:
           - /bin/sh
           - -c
           - |
-            find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +4 -delete || true
+            find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
 
   extendedConfiguration: |
     max_connections = 3001
