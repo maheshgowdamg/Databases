@@ -11,15 +11,14 @@ metrics:
   pgStatStatements: true
 
 primary:
-  postgresql:
-    containerLifecycle:
-      postStart:
-        exec:
-          command:
-            - /bin/sh
-            - -c
-            - |
-              find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
+  lifecycle:
+    postStart:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - |
+            find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
 
   extendedConfiguration: |
     max_connections = 3001
@@ -47,15 +46,14 @@ primary:
 readReplicas:
   replicaCount: 2
 
-  postgresql:
-    containerLifecycle:
-      postStart:
-        exec:
-          command:
-            - /bin/sh
-            - -c
-            - |
-              find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
+  lifecycle:
+    postStart:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - |
+            find /bitnami/postgresql/logs -name "postgresql-*.log" -mtime +3 -delete || true
 
   extendedConfiguration: |
     max_connections = 3001
