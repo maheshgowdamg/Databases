@@ -21,16 +21,17 @@ primary:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql-%Y-%m-%d.log'
-    log_rotation_age = '1d'               # rotate daily
-    log_rotation_size = 0                 # ignore size
-    log_truncate_on_rotation = on         # overwrite logs daily
-    log_file_mode = 0600
+
+    # Log rotation settings - keeps only 7 days automatically
+    log_filename = 'postgresql-%a.log'   # %a = day name (Mon, Tue, Wed, etc.)
+    log_rotation_age = '1d'              # rotate logs daily
+    log_rotation_size = 0                # no size-based rotation
+    log_truncate_on_rotation = on        # overwrite after 7 days (keep 7 files)
+    log_file_mode = 0600                 # secure permissions
 
     # Log level and slow query tracking
-    log_min_duration_statement = 1000     # 1s threshold
+    log_min_duration_statement = 1000    # log queries slower than 1s
     log_statement = 'none'
-
 
   persistence:
     size: 2Gi
@@ -49,17 +50,18 @@ readReplicas:
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql-%Y-%m-%d.log'
-    log_rotation_age = '1d'
-    log_rotation_size = 0
-    log_truncate_on_rotation = on
-    log_file_mode = 0600
+
+    # Log rotation settings - keeps only 7 days automatically
+    log_filename = 'postgresql-%a.log'   # %a = day name (Mon, Tue, Wed, etc.)
+    log_rotation_age = '1d'              # rotate logs daily
+    log_rotation_size = 0                # no size-based rotation
+    log_truncate_on_rotation = on        # overwrite after 7 days (keep 7 files)
+    log_file_mode = 0600                 # secure permissions
 
     # Log level and slow query tracking
     log_min_duration_statement = 1000
     log_statement = 'none'
 
-  
   persistence:
     size: 2Gi
   resourcesPreset: medium
