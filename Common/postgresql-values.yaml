@@ -26,6 +26,7 @@ primary:
     log_truncate_on_rotation = on
     log_file_mode = 0600
 
+    # Slow query threshold
     log_min_duration_statement = 1000
     log_statement = 'none'
 
@@ -36,8 +37,13 @@ primary:
           - /bin/sh
           - -c
           - |
-            (crontab -l 2>/dev/null; echo "0 0 * * * find /bitnami/postgresql/logs -name 'postgresql-*.log' -mtime +3 -delete") | crontab -
-            service cron start || true
+            (
+              # Background loop: clean logs older than 3 days every 24 hours
+              while true; do
+                find /bitnami/postgresql/logs -type f -name "postgresql-*.log" -mtime +3 -delete || true
+                sleep 86400
+              done
+            ) &
 
   persistence:
     size: 2Gi
@@ -62,6 +68,20 @@ readReplicas:
 
     log_min_duration_statement = 1000
     log_statement = 'none'
+
+  lifecycleHooks:
+    postStart:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - |
+            (
+              while true; do
+                find /bitnami/postgresql/logs -type f -name "postgresql-*.log" -mtime +3 -delete || true
+                sleep 86400
+              done
+            ) &
 
   persistence:
     size: 2Gi
