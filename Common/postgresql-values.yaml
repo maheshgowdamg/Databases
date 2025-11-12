@@ -12,6 +12,48 @@ metrics:
 
 primary:
   extendedConfiguration: |
+    # Connection settings
+    max_connections = 3001
+    shared_preload_libraries = 'pg_stat_statements'
+    pg_stat_statements.track = all
+
+    # Logging configuration
+    log_destination = 'stderr'
+    logging_collector = on
+    log_directory = '/bitnami/postgresql/logs'
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_rotation_age = '1d'               # rotate daily
+    log_rotation_size = 0                 # ignore size
+    log_truncate_on_rotation = on         # overwrite logs daily
+    log_file_mode = 0600
+
+    # Log level and slow query tracking
+    log_min_duration_statement = 1000     # 1s threshold
+    log_statement = 'none'
+
+  # ✅ Safe daily log cleanup loop (no cron, no sidecar)
+  initdbScripts:
+    cleanup.sh: |
+      #!/bin/bash
+      (
+        while true; do
+          if [ -d /bitnami/postgresql/logs ]; then
+            # Delete PostgreSQL logs older than 3 days
+            find /bitnami/postgresql/logs -type f -name "postgresql-*.log" -mtime +3 -delete || true
+          fi
+          sleep 86400  # Run every 24 hours
+        done
+      ) &
+
+  persistence:
+    size: 2Gi
+  resourcesPreset: medium
+
+readReplicas:
+  replicaCount: 2
+
+  extendedConfiguration: |
+    # Connection settings
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
@@ -26,62 +68,22 @@ primary:
     log_truncate_on_rotation = on
     log_file_mode = 0600
 
-    # Slow query threshold
+    # Log level and slow query tracking
     log_min_duration_statement = 1000
     log_statement = 'none'
 
-  lifecycleHooks:
-    postStart:
-      exec:
-        command:
-          - /bin/sh
-          - -c
-          - |
-            (
-              # Background loop: clean logs older than 3 days every 24 hours
-              while true; do
-                find /bitnami/postgresql/logs -type f -name "postgresql-*.log" -mtime +3 -delete || true
-                sleep 86400
-              done
-            ) &
-
-  persistence:
-    size: 2Gi
-  resourcesPreset: medium
-
-readReplicas:
-  replicaCount: 2
-
-  extendedConfiguration: |
-    max_connections = 3001
-    shared_preload_libraries = 'pg_stat_statements'
-    pg_stat_statements.track = all
-
-    log_destination = 'stderr'
-    logging_collector = on
-    log_directory = '/bitnami/postgresql/logs'
-    log_filename = 'postgresql-%Y-%m-%d.log'
-    log_rotation_age = '1d'
-    log_rotation_size = 0
-    log_truncate_on_rotation = on
-    log_file_mode = 0600
-
-    log_min_duration_statement = 1000
-    log_statement = 'none'
-
-  lifecycleHooks:
-    postStart:
-      exec:
-        command:
-          - /bin/sh
-          - -c
-          - |
-            (
-              while true; do
-                find /bitnami/postgresql/logs -type f -name "postgresql-*.log" -mtime +3 -delete || true
-                sleep 86400
-              done
-            ) &
+  # ✅ Apply same cleanup on replicas
+  initdbScripts:
+    cleanup.sh: |
+      #!/bin/bash
+      (
+        while true; do
+          if [ -d /bitnami/postgresql/logs ]; then
+            find /bitnami/postgresql/logs -type f -name "postgresql-*.log" -mtime +3 -delete || true
+          fi
+          sleep 86400
+        done
+      ) &
 
   persistence:
     size: 2Gi
