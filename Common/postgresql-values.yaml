@@ -31,19 +31,6 @@ primary:
     log_min_duration_statement = 1000     # 1s threshold
     log_statement = 'none'
 
-  # ✅ Safe daily log cleanup loop (no cron, no sidecar)
-  initdbScripts:
-    cleanup.sh: |
-      #!/bin/bash
-      (
-        while true; do
-          if [ -d /bitnami/postgresql/logs ]; then
-            # Delete PostgreSQL logs older than 3 days
-            find /bitnami/postgresql/logs -type f -name "postgresql-*.log" -mtime +3 -delete || true
-          fi
-          sleep 86400  # Run every 24 hours
-        done
-      ) &
 
   persistence:
     size: 2Gi
@@ -72,19 +59,7 @@ readReplicas:
     log_min_duration_statement = 1000
     log_statement = 'none'
 
-  # ✅ Apply same cleanup on replicas
-  initdbScripts:
-    cleanup.sh: |
-      #!/bin/bash
-      (
-        while true; do
-          if [ -d /bitnami/postgresql/logs ]; then
-            find /bitnami/postgresql/logs -type f -name "postgresql-*.log" -mtime +3 -delete || true
-          fi
-          sleep 86400
-        done
-      ) &
-
+  
   persistence:
     size: 2Gi
   resourcesPreset: medium
