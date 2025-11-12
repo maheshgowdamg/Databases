@@ -1,3 +1,4 @@
+
 architecture: replication
 
 global:
@@ -10,43 +11,7 @@ metrics:
   enabled: true
   pgStatStatements: true
 
-  # Enable pg_stat_statements metrics export
-  extraFlags:
-    - --collector.stat_statements
-    - --extend.query-path=/conf/custom-metrics.yaml
-
-  # Custom slow query metrics for Grafana dashboards
-  customMetrics: |
-    pg_stat_statements_top_mean_time:
-      query: >
-        SELECT queryid::text,
-               regexp_replace(query, E'[\\n\\r\\s]+', ' ', 'g') AS query,
-               mean_time, calls, total_time
-        FROM pg_stat_statements
-        WHERE calls > 0
-        ORDER BY mean_time DESC
-        LIMIT 50;
-      metrics:
-        - queryid: { usage: "LABEL" }
-        - query: { usage: "LABEL" }
-        - mean_time: { usage: "GAUGE" }
-        - total_time: { usage: "GAUGE" }
-        - calls: { usage: "GAUGE" }
-
-    pg_stat_statements_top_total_time:
-      query: >
-        SELECT queryid::text,
-               regexp_replace(query, E'[\\n\\r\\s]+', ' ', 'g') AS query,
-               total_time, calls
-        FROM pg_stat_statements
-        WHERE calls > 0
-        ORDER BY total_time DESC
-        LIMIT 50;
-      metrics:
-        - queryid: { usage: "LABEL" }
-        - query: { usage: "LABEL" }
-        - total_time: { usage: "GAUGE" }
-        - calls: { usage: "GAUGE" }
+  
 
 primary:
   lifecycleHooks:
@@ -78,8 +43,8 @@ primary:
     # ✅ Slow query threshold (1 second)
     log_min_duration_statement = 1000
 
-    # ❗ REMOVE this to avoid logging every query (spam)
-    # log_statement = 'all'
+    
+    log_statement = 'all'
 
   persistence:
     size: 2Gi
@@ -116,7 +81,7 @@ readReplicas:
     log_min_duration_statement = 1000
 
     # ❗ REMOVE this also
-    # log_statement = 'all'
+    log_statement = 'all'
 
   persistence:
     size: 2Gi
