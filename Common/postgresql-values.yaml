@@ -7,11 +7,6 @@ image:
   tag: 16.3.0-debian-12-r19
   pullPolicy: IfNotPresent
 
-# optional: sidecar images also from same registry
-volumePermissions:
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/os-shell
 
 metrics:
   enabled: true
