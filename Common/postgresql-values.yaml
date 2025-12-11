@@ -13,9 +13,9 @@ global:
 # Image Overrides (bitnamilegacy)
 # --------------------------
 image:
-  registry: docker.io
+  
   repository: bitnamilegacy/postgresql
-  tag: 16.1.0-debian-11-r27   # <-- Valid legacy tag
+  tag: 16.3.0-debian-12-r19   # <-- Valid legacy tag
   pullPolicy: IfNotPresent
 
 volumePermissions:
