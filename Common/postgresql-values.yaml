@@ -1,101 +1,71 @@
 architecture: replication
 
-# --------------------------
-# Global Auth
-# --------------------------
 global:
   postgresql:
     auth:
       existingSecret: postgresql
       database: postgres
 
-# --------------------------
-# Image Overrides (bitnamilegacy)
-# --------------------------
-image:
-  
-  repository: bitnamilegacy/postgresql
-  tag: 16.3.0-debian-12-r19   # <-- Valid legacy tag
-  pullPolicy: IfNotPresent
-
-volumePermissions:
-  enabled: true
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/os-shell
-    tag: 11-debian-11-r80
-
 metrics:
   enabled: true
   pgStatStatements: true
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/postgres-exporter
-    tag: 0.10.1-debian-11-r72
 
-# --------------------------
-# Primary Database
-# --------------------------
 primary:
-  extraEnvVars:
-    - name: BITNAMI_DEBUG
-      value: "false"
-
   extendedConfiguration: |
-    # connection settings
+    # Connection settings
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
 
-    # logging
+    # Logging configuration
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
 
-    # log rotation
-    log_filename = 'postgresql-%a.log'
-    log_rotation_age = '1d'
-    log_rotation_size = 0
-    log_truncate_on_rotation = on
-    log_file_mode = 0600
+    # Log rotation settings - keeps only 7 days automatically
+    log_filename = 'postgresql-%a.log'   # %a = day name (Mon, Tue, Wed, etc.)
+    log_rotation_age = '1d'              # rotate logs daily
+    log_rotation_size = 0                # no size-based rotation
+    log_truncate_on_rotation = on        # overwrite after 7 days (keep 7 files)
+    log_file_mode = 0600                 # secure permissions
 
-    # slow queries
-    log_min_duration_statement = 1000
+    # Log level and slow query tracking
+    log_min_duration_statement = 1000    # log queries slower than 1s
     log_statement = 'none'
 
   persistence:
     size: 2Gi
+  resourcesPreset: medium
 
-# --------------------------
-# Read Replicas
-# --------------------------
 readReplicas:
   replicaCount: 2
 
   extendedConfiguration: |
+    # Connection settings
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
 
+    # Logging configuration
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
 
-    log_filename = 'postgresql-%a.log'
-    log_rotation_age = '1d'
-    log_rotation_size = 0
-    log_truncate_on_rotation = on
-    log_file_mode = 0600
+    # Log rotation settings - keeps only 7 days automatically
+    log_filename = 'postgresql-%a.log'   # %a = day name (Mon, Tue, Wed, etc.)
+    log_rotation_age = '1d'              # rotate logs daily
+    log_rotation_size = 0                # no size-based rotation
+    log_truncate_on_rotation = on        # overwrite after 7 days (keep 7 files)
+    log_file_mode = 0600                 # secure permissions
 
+    # Log level and slow query tracking
     log_min_duration_statement = 1000
     log_statement = 'none'
 
   persistence:
     size: 2Gi
+  resourcesPreset: medium
 
-# --------------------------
-# Replication
-# --------------------------
 replication:
   enabled: true
   numSynchronousReplicas: 1
