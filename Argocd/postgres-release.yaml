@@ -22,29 +22,9 @@ spec:
       helm:
         valueFiles:
           - $values/Common/postgresql-values.yaml
-        values: |
-          image:
-            repository: bitnamilegacy/postgresql
-            tag: 16.3.0-debian-12-r19
+       
 
-          volumePermissions:
-            enabled: true
-            image:
-              repository: bitnamilegacy/os-shell
-
-          metrics:
-            enabled: true
-            pgStatStatements: true
-            image:
-              repository: bitnamilegacy/postgres-exporter
-
-          primary:
-            extraEnvVars:
-              - name: BITNAMI_DEBUG
-                value: "false"
-
-          readReplicas:
-            replicaCount: 2
+       
 
     - repoURL: "https://github.com/maheshgowdamg/Databases.git"
       targetRevision: HEAD
