@@ -31,7 +31,7 @@ primary:
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
 
-    log_filename = 'postgresql-%a.log'
+    log_filename = 'postgresql-%Y-%m-%d.log'
     log_rotation_age = '1d'
     log_rotation_size = 0
     log_truncate_on_rotation = on
@@ -56,7 +56,7 @@ readReplicas:
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
 
-    log_filename = 'postgresql-%a.log'
+    log_filename = 'postgresql-%Y-%m-%d.log'
     log_rotation_age = '1d'
     log_rotation_size = 0
     log_truncate_on_rotation = on
