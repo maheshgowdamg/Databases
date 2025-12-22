@@ -1,14 +1,14 @@
 global:
+  imageRegistry: public.ecr.aws
   compatibility:
     openshift: false
 
 # ----------------------------
-# MongoDB Image (STABLE TAG)
+# MongoDB Image (ECR MIRROR)
 # ----------------------------
 image:
-  registry: docker.io
   repository: bitnami/mongodb
-  tag: 7.0.3
+  tag: 7.0.11
   pullPolicy: IfNotPresent
 
 # ----------------------------
@@ -33,12 +33,11 @@ arbiter:
   enabled: false
 
 # ----------------------------
-# Metrics (STABLE TAG)
+# Metrics (ECR MIRROR)
 # ----------------------------
 metrics:
   enabled: true
   image:
-    registry: docker.io
     repository: bitnami/mongodb-exporter
     tag: 0.40.0
     pullPolicy: IfNotPresent
