@@ -2,27 +2,60 @@ global:
   compatibility:
     openshift: false
 
+# ----------------------------
+# MongoDB Image (FIXED TAG)
+# ----------------------------
+image:
+  registry: docker.io
+  repository: bitnami/mongodb
+  tag: 7.0.8-debian-12-r0
+  pullPolicy: IfNotPresent
+
+# ----------------------------
+# Architecture
+# ----------------------------
 architecture: replicaset
 replicaCount: 2
 replicaSetName: rs0
 useStatefulSet: true
 
+# ----------------------------
+# Authentication
+# ----------------------------
 auth:
   enabled: true
   existingSecret: mongo
 
+# ----------------------------
+# Arbiter
+# ----------------------------
 arbiter:
   enabled: false
 
+# ----------------------------
+# Metrics (FIXED EXPORTER TAG)
+# ----------------------------
 metrics:
   enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/mongodb-exporter
+    tag: 0.40.0-debian-12-r29
+    pullPolicy: IfNotPresent
   resources:
     requests:
       memory: 100Mi
     limits:
       memory: 200Mi
 
+# ----------------------------
+# Persistence
+# ----------------------------
 persistence:
+  enabled: true
   size: 1Gi
 
+# ----------------------------
+# Resources
+# ----------------------------
 resourcesPreset: small
