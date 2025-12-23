@@ -26,19 +26,14 @@ primary:
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
-
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-
     log_filename = 'postgresql-%Y-%m-%d.log'
-    log_rotation_age = '1d'
-    log_rotation_size = 0
-    log_truncate_on_rotation = on
-    log_file_mode = 0600
-
+    log_connections = off
+    log_disconnections = off
     log_min_duration_statement = 1000
-    log_statement = 'none'
+    log_statement = 'all'
 
   persistence:
     size: 2Gi
@@ -51,19 +46,14 @@ readReplicas:
     max_connections = 3001
     shared_preload_libraries = 'pg_stat_statements'
     pg_stat_statements.track = all
-
     log_destination = 'stderr'
     logging_collector = on
     log_directory = '/bitnami/postgresql/logs'
-
     log_filename = 'postgresql-%Y-%m-%d.log'
-    log_rotation_age = '1d'
-    log_rotation_size = 0
-    log_truncate_on_rotation = on
-    log_file_mode = 0600
-
+    log_connections = off
+    log_disconnections = off
     log_min_duration_statement = 1000
-    log_statement = 'none'
+    log_statement = 'all'
 
   persistence:
     size: 2Gi
